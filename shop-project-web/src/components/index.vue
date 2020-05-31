@@ -1,4 +1,4 @@
-<style scoped>
+<style scoped xmlns:v-bind="http://www.w3.org/1999/xhtml">
   .layout{
     border: 1px solid #d7dde4;
     background: #f5f7f9;
@@ -23,6 +23,29 @@
   }
   .layout-footer-center{
     text-align: center;
+  }
+
+  #productBox{
+    margin: 0px auto;
+    width: 1400px;
+  }
+  #productBox ul{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #productBox li{
+    padding: 10px;
+    list-style: none;
+    margin-right: 30px;
+    margin-top: 30px;
+    border: 1px solid #eee;
+  }
+  #productBox img{
+    width: 220px;
+    height: 220px;
+  }
+  #pageBox{
+    margin-top: 40px;
   }
 </style>
 <template>
@@ -52,14 +75,25 @@
         </Menu>
       </Header>
       <Content :style="{padding: '0 50px'}">
-        <Breadcrumb :style="{margin: '20px 0'}">
-          <BreadcrumbItem>首页</BreadcrumbItem>
-          <BreadcrumbItem>商城</BreadcrumbItem>
-          <BreadcrumbItem>分类</BreadcrumbItem>
-        </Breadcrumb>
+        <Input v-model="keyword" placeholder="苹果平板" style="width: 500px;margin: 20px;" />
+        <Button type="primary" @click="search(keyword,1,pageSize)" icon="ios-search" style="margin-left: -25px;">搜索</Button>
         <Card>
-          <div style="min-height: 700px;">
-            这里是数不清的商品
+          <div style="width: 1816px;height: 713px;" id="bigBox">
+
+            <div id="productBox">
+              <ul>
+                <li v-for="v in productList">
+                  <img v-bind:src="v.masterPic" alt="">
+                  <p v-html="v.productName"></p>
+                  <p>￥{{v.productPrice}}</p>
+                </li>
+              </ul>
+            </div>
+
+            <div id="pageBox">
+              <Page v-if="totalElements!=0" :total="totalElements" :current="pageNum" :page-size="pageSize" @on-change="handlePage" show-elevator show-total/>
+            </div>
+
           </div>
         </Card>
       </Content>
@@ -73,6 +107,11 @@
       return{
         showLogin:false,
         showReLogin:false,
+        keyword: '',
+        productList:[],
+        totalElements:0,
+        pageNum: 1,
+        pageSize: 10,
       }
     },
     created(){
@@ -93,7 +132,33 @@
       relogin(){
         this.$storage.remove("loginToken");
         location.reload();
-      }
-    }
+      },
+      search(keyword,pageNum,pageSize) {
+        if (keyword!='') {
+          this.pageNum = pageNum;
+          this.$axios.get(this.$productUrl+'search',{
+            params: {
+              'keyword':keyword,
+              'page': pageNum-1,
+              'size': pageSize
+            }
+          }).then(res=>{
+            if(res.data.code!=200){
+              this.$Message.error(res.data.msg);
+            }else {
+              this.productList = res.data.data.productList;
+              this.totalElements = res.data.data.totalElements;
+            }
+          }).catch(err=>{
+            this.$Message.error(err.response.message);
+          });
+        }
+      },
+      handlePage(value){
+        this.pageNum = value;
+        this.search(this.keyword,this.pageNum,this.pageSize);
+      },
+    },
+
   }
 </script>

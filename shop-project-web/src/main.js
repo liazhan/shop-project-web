@@ -19,7 +19,9 @@ Vue.prototype.$storage = storage
 
 //全局变量-会员服务访问地址
 Vue.prototype.$memberUrl = 'http://127.0.0.1/liazhan-member/'
-//全局变量-图片地址前缀
+//全局变量-商品服务访问地址
+Vue.prototype.$productUrl = 'http://127.0.0.1/liazhan-product/'
+//全局变量-七牛云图片地址前缀
 Vue.prototype.$picUrl = 'http://q9u97hqms.bkt.clouddn.com/'
 
 Vue.config.productionTip = false
